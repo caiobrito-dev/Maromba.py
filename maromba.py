@@ -21,7 +21,8 @@ username_text = False
 
 dados = dict(Username="", Senha="")
 cadastros = [
-    dict(Username="adm2023", Senha="aed1")
+    dict(Username="adm2023", Senha="aed1"),
+    dict(Username="dono do curso", Senha="pinheiro")
 ]
 
 # janela
