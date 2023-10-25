@@ -1,0 +1,11 @@
+Monte um treino, apenas com agrupamento do dia, exercícios com suas series e repetições, sem dias de descanso nos dias  disponiveis de treino. Separe os dias e cada exercicio com
+o caracter ";"
+Ao trocar de dia (treino), crie a próxima linha com apenas o caractere '\n'
+Preciso que você mande sem  a mensagem "claro aqui está.." e não coloque nenhum aviso no final
+idade:36
+sexo: masculino
+peso: 76
+altura:1.76
+dias da semana disponíveis para treino: 4
+aqui está um exemplo de como fazer entretanto não copie ele:
+Dia 1 (Segunda-feira) ;Treino de X e Y: ; Exercicio 1: 4x10; Exercicio 2: 3x12;Exercicio 3: 3x12;Exercicio 4: 4x10;Exercicio 5: 3x12\nDia 2 (Terça-feira) ;Treino de Z:;Exercicio 1: 4x10;Exercicio 2: 3x12;Exercicio 3: 3x12;Exercicio 4: 4x10;Exercicio 5: 4x15\n

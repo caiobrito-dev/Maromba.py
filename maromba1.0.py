@@ -13,7 +13,7 @@ def cria_input(x, y, width, size):
 
 # variaveis
 largura, altura = 1280, 720
-centro = Point(largura/2, altura/2)
+centro = Point(largura / 2, altura / 2)
 username_flag = False
 senha_flag = False
 email_flag = False
@@ -27,7 +27,7 @@ objetivo_flag = False
 dados = dict(Username="", Senha="")
 lista_logins = []
 
-logins = open("cadastros.csv" , "r")
+logins = open("cadastros.csv", "r")
 lista_nomes = logins.readlines()
 for pessoa in lista_nomes:
     pessoa = pessoa.split(";")
@@ -109,7 +109,7 @@ Tela_Cadastro = True
 cadastro = Image(centro, 'CADASTRO.png')
 cadastro.draw(janela)
 
-logins = open("cadastros.csv" , "a")
+logins = open("cadastros.csv", "a")
 
 while Tela_Cadastro:
 
@@ -175,14 +175,8 @@ while Tela_Cadastro:
                 peso = peso.getText()
                 disponibilidade = disponibilidade.getText()
                 objetivo = objetivo.getText()
-                print(idade)
-                print(peso)
-                print(disponibilidade)
-                print(objetivo)
                 Tela_Cadastro = False
                 cadastro.undraw()
-
-
 
 # tela de loading
 Tela_Loading = True
@@ -192,25 +186,68 @@ loading.draw(janela)
 api_key = "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"
 
 while Tela_Loading:
+    def requi():
+        link = "https://api.openai.com/v1/chat/completions"
+        id = "gpt-3.5-turbo"
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
-    link = "https://api.openai.com/v1/chat/completions"
-    id = "gpt-3.5-turbo"
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        mensagem = {
+            "model": id,
+            "messages": [{"role": "user", "content": """Monte um treino, apenas com agrupamento do dia, exercícios com suas series e repetições, sem dias de descanso nos dias  disponiveis de treino. Separe os dias e cada exercicio com o caracter ";"
+    Ao trocar de dia (treino), crie a próxima linha apenas com o caractere '\n'. So coloque o caracter "\n" no final de cada dia.
+    Preciso que você mande sem  a mensagem "claro aqui está..." e sem a mensagem "lembrando que os exercicios..."
+    So quebre a linha no final de cada dia!
+    No lugar de cada exercicio escreva o seu nome como supino, agachamento, triceps corda...
+    segue minhas informações:
+    idade:24
+    sexo: masculino
+    peso: 77
+    altura:1.64
+    dias da semana disponíveis para treino: 7
 
-    mensagem = {
-        "model": id,
-        "messages": [{"role": "user", "content": "Escreva um email para meu professor que é muito chato"}]
-    }
+    Aqui está um exemplo de como fazer entretanto não copie ele:
+    Dia 1 (Segunda-feira) ;Treino de X e Y: ; Exercicio 1: 4x10; Exercicio 2: 3x12;Exercicio 3: 3x12;Exercicio 4: 4x10;Exercicio 5: 3x12\nDia 2 (Terça-feira) ;Treino de Z:;Exercicio 1: 4x10;Exercicio 2: 3x12;Exercicio 3: 3x12;Exercicio 4: 4x10;Exercicio 5: 4x15\n"""
+                          }]
+        }
 
-    mensagem = json.dumps(mensagem)
-    requisicao = requests.post(link, headers=headers, data=mensagem)
+        mensagem = json.dumps(mensagem)
+        requisicao = requests.post(link, headers=headers, data=mensagem)
 
-    output = requisicao.json()
+        output = requisicao.json()
+        output = output["choices"][0]["message"]["content"]
+        if output != None or output != "":
+            if output.count('\n') > 6:
+                print("errou")
+                requi()
+            else:
+                return output
+        else:
+            requi()
+
+
+    output = requi()
 
     if output != "":
+        dados_treino_tratados = ""
         print(output)
-        janela.close()
-        break
+        print(output.count("\n"))
+        print(type(output))
+        output = output.split("\n")
+        print(output)
+        for dia in output:
+            if dia != "" and dia != "\n":
+                dia = dia.split(";")
+                print(dia)
+                dados_treino_tratados += dia[0] + " - " + dia[1] + "\n" + "->"
+            for exercicio in dia[2:]:
+                if dia.index(exercicio) == len(dia) - 1:
+                    dados_treino_tratados += exercicio + "\n"
+                else:
+                    dados_treino_tratados += exercicio + "\n" + "->"
+        print(dados_treino_tratados)
+
+    janela.close()
+    break
 
 '''# checando mouse
     pos_mouse = janela.checkMouse()
