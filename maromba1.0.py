@@ -39,6 +39,7 @@ janela = GraphWin('Maromba.Py', largura, altura)
 
 # tela de login
 Tela_Login = True
+Tela_Cadastro = False
 login = Image(centro, 'MENU.png')
 login.draw(janela)
 
@@ -82,13 +83,16 @@ while Tela_Login:
                             print("Tem login")
                             username.undraw()
                             senha.undraw()
-                            loading = Image(centro, "LOADING.png")
+                            treino = Image(centro, "TREINO.png")
                             login.undraw()
-                            loading.draw(janela)
+                            treino.draw(janela)
                             break
                         else:
-                            print("Não tem")
+                            erro_login = Image(centro, "TELA_LOGIN_ERRO.png")
+                            erro_login.draw(janela)
             else:
+                erro_login = Image(centro, "TELA_LOGIN_ERRO.png")
+                erro_login.draw(janela)
                 print("Caio")  # erro de não digitar nada
 
         # clicando no botão de cadastro
@@ -101,13 +105,14 @@ while Tela_Login:
                 username_flag = False
             Tela_Login = False
             login.undraw()
+            Tela_Cadastro = True
+
 
 print(dados)
-
-# tela de cadastro
-Tela_Cadastro = True
-cadastro = Image(centro, 'CADASTRO.png')
-cadastro.draw(janela)
+if Tela_Cadastro:
+    # tela de cadastro
+    cadastro = Image(centro, 'CADASTRO.png')
+    cadastro.draw(janela)
 
 logins = open("cadastros.csv", "a")
 
@@ -171,17 +176,26 @@ while Tela_Cadastro:
                 logins.write(username.getText()), logins.write(";")
                 logins.write(senha.getText()), logins.write(";"), logins.write("\n")
 
+                username = username.getText().lower()
+
                 idade = idade.getText()
+                print(idade)
+                genero = genero.getText()
+                print(genero)
                 peso = peso.getText()
+                print(peso)
+                altura = altura.getText()
+                print(altura)
                 disponibilidade = disponibilidade.getText()
-                objetivo = objetivo.getText()
+                print(disponibilidade)
                 Tela_Cadastro = False
                 cadastro.undraw()
+                Tela_Loading = True
 
 # tela de loading
-Tela_Loading = True
-loading = Image(centro, 'LOADING.png')
-loading.draw(janela)
+if Tela_Loading:
+    loading = Image(centro, 'LOADING.png')
+    loading.draw(janela)
 
 api_key = "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"
 
@@ -193,21 +207,31 @@ while Tela_Loading:
 
         mensagem = {
             "model": id,
-            "messages": [{"role": "user", "content": """Monte um treino, apenas com agrupamento do dia, exercícios com suas series e repetições, sem dias de descanso nos dias  disponiveis de treino. Separe os dias e cada exercicio com o caracter ";"
-    Ao trocar de dia (treino), crie a próxima linha apenas com o caractere '\n'. So coloque o caracter "\n" no final de cada dia.
-    Preciso que você mande sem  a mensagem "claro aqui está..." e sem a mensagem "lembrando que os exercicios..."
-    So quebre a linha no final de cada dia!
-    No lugar de cada exercicio escreva o seu nome como supino, agachamento, triceps corda...
-    segue minhas informações:
-    idade:24
-    sexo: masculino
-    peso: 77
-    altura:1.64
-    dias da semana disponíveis para treino: 7
+            "messages": [{"role": "user", "content": f"""monte um treino, apenas com agrupamento do dia, exercícios com suas series e repetições.
+Ao trocar de dia (treino), crie a próxima linha com apenas o caractere ' ; '
+Sem textos supérfluos 
+idade:{idade}
+sexo: {genero}
+peso:{peso}
+altura: {altura}
+dias da semana disponíveis para treino: {disponibilidade}
 
-    Aqui está um exemplo de como fazer entretanto não copie ele:
-    Dia 1 (Segunda-feira) ;Treino de X e Y: ; Exercicio 1: 4x10; Exercicio 2: 3x12;Exercicio 3: 3x12;Exercicio 4: 4x10;Exercicio 5: 3x12\nDia 2 (Terça-feira) ;Treino de Z:;Exercicio 1: 4x10;Exercicio 2: 3x12;Exercicio 3: 3x12;Exercicio 4: 4x10;Exercicio 5: 4x15\n"""
-                          }]
+-> Por exemplo:
+Dia 1 (Segunda-feira) - Treino de Peito e Tríceps:
+Supino Reto: 4x10
+Supino Inclinado com Halteres: 3x12
+Crucifixo na Máquina: 3x12
+Tríceps Testa: 4x10
+Tríceps Corda no Pulley: 3x12
+;
+Dia 2 (Terça-feira) - Treino de Pernas:
+Agachamento Livre: 4x10
+Leg Press: 3x12
+Cadeira Extensora: 3x12
+Flexora deitado: 4x10
+Panturrilha no Leg Press: 4x15
+;
+..."""}]
         }
 
         mensagem = json.dumps(mensagem)
@@ -216,43 +240,104 @@ while Tela_Loading:
         output = requisicao.json()
         output = output["choices"][0]["message"]["content"]
         if output != None or output != "":
-            if output.count('\n') > 6:
-                print("errou")
-                requi()
-            else:
-                return output
+            print(output)
+            return output
         else:
             requi()
 
-
     output = requi()
 
+    #Recebendo output do gpt
     if output != "":
-        dados_treino_tratados = ""
-        print(output)
-        print(output.count("\n"))
-        print(type(output))
-        output = output.split("\n")
-        print(output)
+        arq_treino = open("treinos.csv", "a")
+        arq_treino.write(f"{username}\n")
+        dados_treino_tratados = [] #Lista com todos os dias de treino
+        output = output.split(";")
         for dia in output:
-            if dia != "" and dia != "\n":
-                dia = dia.split(";")
-                print(dia)
-                dados_treino_tratados += dia[0] + " - " + dia[1] + "\n" + "->"
-            for exercicio in dia[2:]:
-                if dia.index(exercicio) == len(dia) - 1:
-                    dados_treino_tratados += exercicio + "\n"
-                else:
-                    dados_treino_tratados += exercicio + "\n" + "->"
+            dia = dia.split("\n")
+            for exercicio in dia: # Retirando o \n e listas vazias
+                if exercicio == "":
+                    dia.remove(exercicio)
+            if len(dia) != 0:
+                dados_treino_tratados.append(dia)
+                dia = ";".join(dia)
+                dia += ";"
+                arq_treino.write(dia)
+                arq_treino.write("\n")
+        print("-----------------------------------------------------------")
         print(dados_treino_tratados)
+        for dia in dados_treino_tratados:
+            dia = ";".join(dia) #Vai ter que criar uma lista nova
+        print(dados_treino_tratados)
+        print("-------------------")
+        arq_treino.write("$")
+        arq_treino.write("\n")
 
-    janela.close()
-    break
+        Tela_Treino = True
+        break
 
-'''# checando mouse
-    pos_mouse = janela.checkMouse()
-    if pos_mouse is not None:
-        pos_mouseX = pos_mouse.getX()
-        pos_mouseY = pos_mouse.getY()
-'''
+
+if Tela_Treino:
+    treino = Image(centro, "TREINO.png")
+    Tela_Loading = False
+    Tela_Cadastro = False
+    Tela_Login = False
+    treino.draw(janela)
+
+def Mostra_Treino(arq, nome):
+    treino = open(arq, "r") #Abrindo arquivos com treinos
+    treino = treino.read()
+    treino = treino.split("$") #Separando os treinos de cada pessoa
+    todos_treinos = []
+    coluna1 = ""
+    coluna2 = ""
+    for pessoa in treino:
+        pessoa = pessoa.split("\n")
+        for exercicio in pessoa:
+            if exercicio == "": #Removendo os \n
+                pessoa.remove(exercicio)
+        if len(pessoa) != 0: #Colocando em uma lista com todas as pessoas
+            todos_treinos.append(pessoa)
+            #Removendo a lista vazia que sobra
+    print(todos_treinos)
+    for pessoa in todos_treinos:
+        if pessoa[0] == nome:
+            treino_escolido = pessoa
+            break
+        else:
+            print("Não tem esse nome")
+
+    print(treino_escolido)
+    treino_tratado = []
+    for dia in treino_escolido[1:]: #Retirando os ; e colocando \n
+        dia_new = dia.replace(";","\n")
+        treino_tratado.append(dia_new)
+    print(treino_tratado)
+
+
+    tamanho_coluna_1 = len(treino_tratado) // 2
+    for exercicio in range(0,tamanho_coluna_1):
+        coluna1 += treino_tratado[exercicio] + "\n"
+
+    for exercicio in range(tamanho_coluna_1, len(treino_tratado)):
+        coluna2 += treino_tratado[exercicio] + "\n"
+
+    return coluna1, coluna2
+
+
+
+while Tela_Treino:
+
+    Nome_do_Treino = Text(Point(640,101), f"Treino de {username}")
+    Nome_do_Treino.setSize(17), Nome_do_Treino.setTextColor(color_rgb(166,166,166)), Nome_do_Treino.setStyle("bold")
+    Nome_do_Treino.draw(janela)
+    textos = Mostra_Treino("treinos.csv",username.lower())
+    coluna1 = Text(Point(426,375), textos[0])
+    coluna2 = Text(Point(853,375), textos[1])
+    coluna1.draw(janela)
+    coluna2.draw(janela)
+    tecla = janela.getKey()
+    if tecla == "a":
+        janela.close()
+
 
