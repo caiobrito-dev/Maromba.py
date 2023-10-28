@@ -26,6 +26,7 @@ objetivo_flag = False
 
 dados = dict(Username="", Senha="")
 
+# criando login
 lista_logins = []
 logins = open("cadastros.csv", "r")
 lista_nomes = logins.readlines()
@@ -33,7 +34,6 @@ for pessoa in lista_nomes:
     pessoa = pessoa.split(";")
     lista_logins.append(pessoa)
 logins.close()
-print(lista_nomes)
 print(lista_logins)
 
 # janela
@@ -49,7 +49,7 @@ Tela_Treinador_3 = False
 Tela_Loading = False
 Tela_Treino_no_cadastro = False
 
-#Iniciando programa
+# Iniciando programa
 login = Image(centro, 'MENU.png')
 login.draw(janela)
 
@@ -79,30 +79,29 @@ while Tela_Login:
                 dados["Username"] = username.getText().lower()
                 dados["Senha"] = senha.getText().lower()
 
-                # checando login
+                # Login do treinador
+                if dados["Username"] == "instrutor" and dados["Senha"] == "aed1":
+                    username.undraw(), senha.undraw()
+                    Tela_Treinador_1 = True
+                    Tela_Login = False
+                    login.undraw()
+                    break
                 for pessoa in lista_logins:
-                    #Login do treinador
-                    if dados["Username"] == "instrutor" and dados["Senha"] == "aed1":
-                        username.undraw()
-                        senha.undraw()
-                        Tela_Treinador_1 = True
+                    # login correto
+                    if pessoa[0] == dados["Username"] and pessoa[1] == dados["Senha"]:
+                        print("Tem login")
+                        username.undraw(), senha.undraw()
+                        Tela_Treino_Login = True
                         Tela_Login = False
                         login.undraw()
                         break
                     else:
-                        #Login encontrado
-                        if pessoa[0] == dados["Username"] and pessoa[1] == dados["Senha"]:
-                            print("Tem login")
-                            username.undraw()
-                            senha.undraw()
-                            Tela_Treino_Login = True
-                            Tela_Login = False
-                            loading_fast = Image(centro, "LOADING.png")
-                            loading_fast.draw(janela)
-                            login.undraw()
-                            break
-                        else:
-                            erro_login = Image(centro, "TELA_LOGIN_ERRO.png") #Tela de erro aparece durante os testes, um bug a ser revisto
+                        contlog = 0
+                        for pessoa2 in lista_logins:
+                            if dados["Username"].count(pessoa2[0]) == 1 and dados["Senha"].count(pessoa2[1]) == 1:
+                                contlog += 1
+                        if contlog == 0:
+                            erro_login = Image(centro, "TELA_LOGIN_ERRO.png")
                             erro_login.draw(janela)
 
         # clicando no botão de cadastro
@@ -117,23 +116,24 @@ while Tela_Login:
             login.undraw()
             Tela_Cadastro = True
 
-
 print(dados)
+
+
 def Mostra_Treino(arq, nome):
-    treino = open(arq, "r") #Abrindo arquivos com treinos
+    treino = open(arq, "r")  # Abrindo arquivos com treinos
     treino = treino.read()
-    treino = treino.split("$") #Separando os treinos de cada pessoa
+    treino = treino.split("$")  # Separando os treinos de cada pessoa
     todos_treinos = []
     coluna1 = ""
     coluna2 = ""
     for pessoa in treino:
         pessoa = pessoa.split("\n")
         for exercicio in pessoa:
-            if exercicio == "": #Removendo os \n
+            if exercicio == "":  # Removendo os \n
                 pessoa.remove(exercicio)
-        if len(pessoa) != 0: #Colocando em uma lista com todas as pessoas
+        if len(pessoa) != 0:  # Colocando em uma lista com todas as pessoas
             todos_treinos.append(pessoa)
-            #Removendo a lista vazia que sobra
+            # Removendo a lista vazia que sobra
     print(todos_treinos)
     for pessoa in todos_treinos:
         if pessoa[0] == nome:
@@ -145,14 +145,13 @@ def Mostra_Treino(arq, nome):
 
     print(treino_escolido)
     treino_tratado = []
-    for dia in treino_escolido[1:]: #Retirando os ; e colocando \n
-        dia_new = dia.replace(";","\n")
+    for dia in treino_escolido[1:]:  # Retirando os ; e colocando \n
+        dia_new = dia.replace(";", "\n")
         treino_tratado.append(dia_new)
     print(treino_tratado)
 
-
     tamanho_coluna_1 = len(treino_tratado) // 2
-    for exercicio in range(0,tamanho_coluna_1):
+    for exercicio in range(0, tamanho_coluna_1):
         coluna1 += treino_tratado[exercicio] + "\n"
 
     for exercicio in range(tamanho_coluna_1, len(treino_tratado)):
@@ -162,71 +161,72 @@ def Mostra_Treino(arq, nome):
 
 
 def Altera_exercicio(arq, nome, exercicio_escolhido, alteracao):
-    arq = open(arq, "r") #Abrindo arquivos com treinos
+    arq = open(arq, "r")  # Abrindo arquivos com treinos
     treino = arq.read()
     arq.close()
-    treino = treino.split("$") #Separando os treinos de cada pessoa
+    treino = treino.split("$")  # Separando os treinos de cada pessoa
     todos_os_treino = []
 
-    #colocando todos os treinos splitados em uma so lista
+    # colocando todos os treinos splitados em uma so lista
     for pessoa in treino:
         pessoa = pessoa.split("\n")
-        #retirando elementos vazios
+        # retirando elementos vazios
         for exercicio in pessoa:
             if exercicio == "":
                 pessoa.remove(exercicio)
         todos_os_treino.append(pessoa)
 
-    #procurando a pessoa
+    # procurando a pessoa
     for pessoa in todos_os_treino:
         if pessoa[0] == nome:
             treino_esolhido = pessoa
             posicao_aluno = todos_os_treino.index(pessoa)
 
-    #lista para realizar o replace
+    # lista para realizar o replace
     novo_treino = []
 
-    #splitando entradas
+    # splitando entradas
     exercicio_escolhido = exercicio_escolhido.split("-")
     alteracao = alteracao.split("-")
     print(exercicio_escolhido)
     print(alteracao)
     print(treino_esolhido)
 
-    #procurando o exercicio para fazer a alteração
+    # procurando o exercicio para fazer a alteração
 
     for dia in treino_esolhido:
 
-        #Vendo se o exercicio está naquele dia de treino
+        # Vendo se o exercicio está naquele dia de treino
         if exercicio_escolhido[0] in dia:
             novo_dia = ""
             dia = dia.split(";")
-            novo_dia += dia[0] + ";" #colocando a parte inicial do treino (dia tal treino tal)
+            novo_dia += dia[0] + ";"  # colocando a parte inicial do treino (dia tal treino tal)
 
-            #Procurando o exercicio a partir disso
+            # Procurando o exercicio a partir disso
             for exercicio in dia[1:]:
 
-                exercicio_splitado = exercicio.split(":") #Splito nos ':' para procurar pelo exercicio e se achar mudar tbm a serie
+                exercicio_splitado = exercicio.split(
+                    ":")  # Splito nos ':' para procurar pelo exercicio e se achar mudar tbm a serie
 
-                if exercicio_splitado[0] == exercicio_escolhido[0]: #Exercicio encontrado
+                if exercicio_splitado[0] == exercicio_escolhido[0]:  # Exercicio encontrado
                     novo_dia += alteracao[0] + ":" + " "
                     novo_dia += alteracao[1] + ";"
                 else:
-                    if len(exercicio_splitado) > 1: #Colocando os outros exercicio na string
+                    if len(exercicio_splitado) > 1:  # Colocando os outros exercicio na string
                         novo_dia += exercicio_splitado[0] + ":"
                         novo_dia += exercicio_splitado[1] + ";"
                     if exercicio == dia[-1]:
                         novo_dia += exercicio_splitado[0]
 
-            novo_treino.append(novo_dia) #colocando na lista principal apos a alteração
+            novo_treino.append(novo_dia)  # colocando na lista principal apos a alteração
 
         else:
             novo_treino.append(dia)
     print(novo_treino)
     print("------------------------")
     todos_os_treino[posicao_aluno] = novo_treino
-    #print(todos_os_treino[posicao_aluno])
-    #print(todos_os_treino)
+    # print(todos_os_treino[posicao_aluno])
+    # print(todos_os_treino)
 
     treino_pro_arquivo = ""
 
@@ -240,7 +240,6 @@ def Altera_exercicio(arq, nome, exercicio_escolhido, alteracao):
     arq = open("treinos_teste.csv", "w")
     arq.write(treino_pro_arquivo)
     arq.close()
-
 
 
 if Tela_Treinador_1:
@@ -259,9 +258,9 @@ if Tela_Treinador_1:
         coluna2_txt += lista_logins[aluno][0].capitalize() + "\n"
     coluna1 = Text(Point(426, 375), coluna1_txt)
     coluna2 = Text(Point(853, 375), coluna2_txt)
-
-    coluna1.draw(janela)
-    coluna2.draw(janela)
+    coluna1.setTextColor(color_rgb(166, 166, 166)), coluna1.setStyle('bold')
+    coluna2.setTextColor(color_rgb(166, 166, 166)), coluna2.setStyle('bold')
+    coluna1.draw(janela), coluna2.draw(janela)
 
     # Aluno escolhido
     aluno_escolhido = cria_input(690, 563, 15, 16)
@@ -275,9 +274,9 @@ while Tela_Treinador_1:
         pos_mouseX = pos_mouse.getX()
         pos_mouseY = pos_mouse.getY()
 
-        #Clicando na escolha do aluno
+        # Clicando na escolha do aluno
         if 532 <= pos_mouseX <= 745 and 591 <= pos_mouseY <= 647:
-            #Verificando texto
+            # Verificando texto
             if aluno_escolhido.getText() != "":
                 aluno = aluno_escolhido.getText().strip().lower()
 
@@ -291,36 +290,34 @@ while Tela_Treinador_1:
                 if aviso_flag:
                     aviso.undraw()
 
-            #Caixa de texto vazia
+            # Caixa de texto vazia
             else:
-                aviso = Text(Point(640,530), "Preencha o campo")
+                aviso = Text(Point(640, 530), "Preencha o campo")
                 aviso.setTextColor(color_rgb(166, 166, 166)), aviso.setStyle("bold")
                 aviso_flag = True
                 aviso.draw(janela)
-
 
 if Tela_Treinador_2:
 
     tela_treinador = Image(centro, "TELA_TREINADOR_2.png")
     tela_treinador.draw(janela)
-    #inputs de exercicios
-    exercicio_escolhido = cria_input(535,590, 20,13)
-    alteracao_do_exercicio = cria_input(900,590, 20,13)
+    # inputs de exercicios
+    exercicio_escolhido = cria_input(535, 590, 20, 13)
+    alteracao_do_exercicio = cria_input(900, 590, 20, 13)
 
-
-    #Mostrando treino do aluno desejado
+    # Mostrando treino do aluno desejado
     textos = Mostra_Treino("treinos.csv", aluno)
 
     if len(textos) == 2:
         coluna1 = Text(Point(426, 360), textos[0].title())
         coluna2 = Text(Point(853, 360), textos[1].title())
-        coluna1.setSize(10)
-        coluna2.setSize(10)
+        coluna1.setSize(10), coluna1.setTextColor(color_rgb(166, 166, 166)), coluna1.setStyle('bold')
+        coluna2.setSize(10), coluna2.setTextColor(color_rgb(166, 166, 166)), coluna2.setStyle('bold')
         coluna1.draw(janela)
         coluna2.draw(janela)
     else:
-        aluno_nao_encontrado = Text(Point(640,360), textos)
-        aluno_nao_encontrado.setStyle("bold")
+        aluno_nao_encontrado = Text(Point(640, 360), textos)
+        aluno_nao_encontrado.setStyle("bold"), aluno_nao_encontrado.setTextColor(color_rgb(166, 166, 166))
         aluno_nao_encontrado.draw(janela)
 
 while Tela_Treinador_2:
@@ -360,8 +357,8 @@ if Tela_Treinador_3:
     textos = Mostra_Treino("treinos_teste.csv", aluno)
     coluna1 = Text(Point(426, 395), textos[0].title())
     coluna2 = Text(Point(853, 395), textos[1].title())
-    coluna1.setSize(10)
-    coluna2.setSize(10)
+    coluna1.setSize(10), coluna1.setTextColor(color_rgb(166, 166, 166)), coluna1.setStyle('bold')
+    coluna2.setSize(10), coluna2.setTextColor(color_rgb(166, 166, 166)), coluna2.setStyle('bold')
     coluna1.draw(janela)
     coluna2.draw(janela)
 
@@ -370,7 +367,6 @@ while Tela_Treinador_3:
     if tecla == "a":
         janela.close()
         break
-
 
 if Tela_Treino_Login:
     tela_treino = Image(centro, "TREINO.png")
@@ -382,17 +378,15 @@ while Tela_Treino_Login:
     Nome_do_Treino.draw(janela)
 
     texto = Mostra_Treino("treinos.csv", dados['Username'])
-    coluna1 = Text(Point(426,375), texto[0].title())
-    coluna1.setSize(11)
-    coluna2 = Text(Point(853,375), texto[1].title())
-    coluna2.setSize(11)
-    coluna1.draw(janela)
-    coluna2.draw(janela)
+    coluna1 = Text(Point(426, 375), texto[0].title())
+    coluna2 = Text(Point(853, 375), texto[1].title())
+    coluna1.setSize(11), coluna1.setTextColor(color_rgb(166, 166, 166)), coluna1.setStyle('bold')
+    coluna2.setSize(11), coluna2.setTextColor(color_rgb(166, 166, 166)), coluna2.setStyle('bold')
+    coluna1.draw(janela), coluna2.draw(janela)
     tecla = janela.getKey()
     if tecla == "a":
         janela.close()
         break
-
 
 if Tela_Cadastro:
     # tela de cadastro
@@ -480,12 +474,11 @@ while Tela_Cadastro:
                 Tela_Loading = True
 
             else:
-                erro_cadastro = Image(centro,"TELA_CADASTRO_ERRO.png")
+                erro_cadastro = Image(centro, "TELA_CADASTRO_ERRO.png")
                 erro_cadastro.draw(janela)
                 print("nao digitou")
 
-
-#While Tela_Cadastro_Novo_Treino:
+# While Tela_Cadastro_Novo_Treino:
 
 # tela de loading
 if Tela_Loading:
@@ -497,11 +490,11 @@ api_key = "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"
 while Tela_Loading:
     def requi():
         link = "https://api.openai.com/v1/chat/completions"
-        id = "gpt-3.5-turbo"
+        idgpt = "gpt-3.5-turbo"
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
         mensagem = {
-            "model": id,
+            "model": idgpt,
             "messages": [{"role": "user", "content": f"""monte um treino, apenas com agrupamento do dia, exercícios com suas series e repetições.
 Ao trocar de dia (treino), crie a próxima linha com apenas o caractere ' ; '
 Sem textos supérfluos 
@@ -534,27 +527,28 @@ Panturrilha no Leg Press: 4x15
 
         output = requisicao.json()
         output = output["choices"][0]["message"]["content"]
-        if output != None or output != "":
+        if output is not None or output != "":
             print(output)
             return output.lower()
         else:
             requi()
 
+
     output = requi()
 
-    #Recebendo output do gpt
+    # Recebendo output do gpt
     if output != "":
         arq_treino = open("treinos.csv", "a")
         arq_treino.write(f"{username}\n")
-        todos_os_treino = [] #Lista com todos os dias de treino
+        todos_os_treino = []  # Lista com todos os dias de treino
 
-        output_sem_carac_proibidos = output.replace("ç", "c").replace("í","i").replace("ô","o").replace("ã","a").replace("á","a").replace("õ","o")
-
+        output_sem_carac_proibidos = (output.replace("ç", "c").replace("í", "i").replace("ô", "o").replace("ã", "a")
+                                      .replace("á", "a").replace("õ", "o"))
         output = output_sem_carac_proibidos.split(";")
 
         for dia in output:
             dia = dia.split("\n")
-            for exercicio in dia: # Retirando o \n e listas vazias
+            for exercicio in dia:  # Retirando o \n e listas vazias
                 if exercicio == "":
                     dia.remove(exercicio)
             if len(dia) != 0:
@@ -568,29 +562,28 @@ Panturrilha no Leg Press: 4x15
 
         print("-----------------------------------------------------------")
         print(todos_os_treino)
-        tratando_treino = [] #Lista para conseguir da join
+        tratando_treino = []  # Lista para conseguir da join
 
         for dia in todos_os_treino:
-            dia = ";".join(dia) #Colocando cada dia em uma string
+            dia = ";".join(dia)  # Colocando cada dia em uma string
             tratando_treino.append(dia)
 
         print(tratando_treino)
-        treino_com_quebralinha = [] #Lista para conseguir colocar a quebra de linha
+        treino_com_quebralinha = []  # Lista para conseguir colocar a quebra de linha
 
-        for dia in tratando_treino: #Colocando um ; no final de cada dia para quebrar a linha
+        for dia in tratando_treino:  # Colocando um ; no final de cada dia para quebrar a linha
             dia += ";" + "" + ";"
             treino_com_quebralinha.append(dia)
 
         print(treino_com_quebralinha)
 
-        for dia in treino_com_quebralinha: #Removendo textos superfluos do gpt
+        for dia in treino_com_quebralinha:  # Removendo textos superfluos do gpt
             if "profissional" in dia.lower() or "consulte" in dia.lower() or "claro" in dia.lower() or "ajustar" in dia.lower() or "obs" in dia.lower():
                 treino_com_quebralinha.remove(dia)
         print("-----------------------------------------------------------")
 
         Tela_Treino_no_cadastro = True
         break
-
 
 if Tela_Treino_no_cadastro:
     treino = Image(centro, "TREINO.png")
@@ -599,16 +592,15 @@ if Tela_Treino_no_cadastro:
     Tela_Login = False
     treino.draw(janela)
 
-
 while Tela_Treino_no_cadastro:
 
-    Nome_do_Treino = Text(Point(640,101), f"Treino de {username.capitalize()}")
-    Nome_do_Treino.setSize(15), Nome_do_Treino.setTextColor(color_rgb(166,166,166)), Nome_do_Treino.setStyle("bold")
+    Nome_do_Treino = Text(Point(640, 101), f"Treino de {username.capitalize()}")
+    Nome_do_Treino.setSize(15), Nome_do_Treino.setTextColor(color_rgb(166, 166, 166)), Nome_do_Treino.setStyle("bold")
     Nome_do_Treino.draw(janela)
     mostra_treino = []
 
     for exercicio in treino_com_quebralinha:
-        exercicio_tratado = exercicio.replace(";","\n")
+        exercicio_tratado = exercicio.replace(";", "\n")
         exercicio_tratado += ";"
         exercicio_tratado = exercicio.replace(";", "\n")
         mostra_treino.append(exercicio_tratado)
@@ -622,13 +614,12 @@ while Tela_Treino_no_cadastro:
     for cont in range(tam, len(mostra_treino)):
         coluna2_txt += mostra_treino[cont]
 
-
-    coluna1 = Text(Point(426,375), coluna1_txt.title())
-    coluna2 = Text(Point(853,375), coluna2_txt.title())
-    coluna1.setSize(11)
-    coluna2.setSize(11)
-    coluna1.draw(janela)
-    coluna2.draw(janela)
+    coluna1 = Text(Point(426, 375), coluna1_txt.title())
+    coluna2 = Text(Point(853, 375), coluna2_txt.title())
+    coluna1.setSize(11), coluna1.setTextColor(color_rgb(166, 166, 166)), coluna1.setStyle('bold')
+    coluna2.setSize(11), coluna2.setTextColor(color_rgb(166, 166, 166)), coluna2.setStyle('bold')
+    coluna1.draw(janela), coluna2.draw(janela)
     tecla = janela.getKey()
     if tecla == "a":
         janela.close()
+        break
