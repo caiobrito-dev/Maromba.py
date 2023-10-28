@@ -160,7 +160,7 @@ def Mostra_Treino(arq, nome):
 
     return coluna1, coluna2
 
-def Apaga_exercicio(arq, nome, exercicio_escolhido, alteracao):
+def Altera_exercicio(arq, nome, exercicio_escolhido, alteracao):
     arq = open(arq, "r") #Abrindo arquivos com treinos
     treino = arq.read()
     arq.close()
@@ -180,11 +180,13 @@ def Apaga_exercicio(arq, nome, exercicio_escolhido, alteracao):
     for pessoa in todos_os_treino:
         if pessoa[0] == nome:
             treino_esolhido = pessoa
+            posicao_aluno = todos_os_treino.index(pessoa)
 
     #lista para realizar o replace
     novo_treino = []
 
     #procurando o exercicio para fazer a alteração
+
     for dia in treino_esolhido:
         if exercicio_escolhido in dia:
 
@@ -193,14 +195,24 @@ def Apaga_exercicio(arq, nome, exercicio_escolhido, alteracao):
         else:
             novo_treino.append(dia)
 
-    #Novo_treino é a lista do treino com a alteração agr é so escrever no arquivo
 
+    todos_os_treino[posicao_aluno] = novo_treino
+    print(todos_os_treino[posicao_aluno])
 
+    treino_pro_arquivo = ""
 
+    for aluno in todos_os_treino:
+        if len(aluno) > 1:
+            for exercicio in aluno:
+                treino_pro_arquivo += exercicio + "\n"
+            treino_pro_arquivo += "$" + "\n"
+    print(treino_pro_arquivo)
 
-#Teste da função
-#Apaga_exercicio("treinos.csv","gb", "supino reto", "agachamento")
+    arq = open("treinos_teste.csv", "w")
+    arq.write(treino_pro_arquivo)
+    arq.close()
 
+#Altera_exercicio("treinos_teste.csv", "gb", "supino reto", "funciona pfvr")
 
 if Tela_Treinador_1:
     tela_treinador = Image(centro, "TELA_TREINADOR_1.png")
@@ -293,7 +305,10 @@ while Tela_Treinador_2:
                 exercicio = exercicio_escolhido.getText().strip().lower()
                 alteracao = alteracao_do_exercicio.getText().strip().lower()
 
+                Altera_exercicio("treinos.csv", aluno, exercicio, alteracao)
+
                 exercicio_escolhido.undraw()
+                alteracao_do_exercicio.undraw()
                 tela_treinador.undraw()
                 Tela_Treinador_3 = True
                 Tela_Treinador_2 = False
@@ -308,13 +323,30 @@ while Tela_Treinador_2:
                 aviso_flag = True
                 aviso.draw(janela)
 
+if Tela_Treinador_3:
+    tela_treinador = Image(centro, "TELA_TREINADOR_3.png")
+    tela_treinador.draw(janela)
+    textos = Mostra_Treino("treinos_teste.csv", aluno)
+    coluna1 = Text(Point(426, 395), textos[0].title())
+    coluna2 = Text(Point(853, 395), textos[1].title())
+    coluna1.setSize(10)
+    coluna2.setSize(10)
+    coluna1.draw(janela)
+    coluna2.draw(janela)
+
+while Tela_Treinador_3:
+    tecla = janela.getKey()
+    if tecla == "a":
+        janela.close()
+        break
+
 
 if Tela_Treino_Login:
     tela_treino = Image(centro, "TREINO.png")
     tela_treino.draw(janela)
 
 while Tela_Treino_Login:
-    Nome_do_Treino = Text(Point(640, 101), f"Treino de {dados['Username']}")
+    Nome_do_Treino = Text(Point(640, 101), f"Treino de {dados['Username'].capitalize()}")
     Nome_do_Treino.setSize(17), Nome_do_Treino.setTextColor(color_rgb(166, 166, 166)), Nome_do_Treino.setStyle("bold")
     Nome_do_Treino.draw(janela)
 
@@ -327,7 +359,6 @@ while Tela_Treino_Login:
     coluna2.draw(janela)
     tecla = janela.getKey()
     if tecla == "a":
-
         janela.close()
         break
 
@@ -399,6 +430,7 @@ while Tela_Cadastro:
                 username.undraw(), senha.undraw(), email.undraw(), genero.undraw(), idade.undraw(), peso.undraw(), altura.undraw(), disponibilidade.undraw(), objetivo.undraw()
                 logins.write(username.getText().lower()), logins.write(";")
                 logins.write(senha.getText().lower()), logins.write(";"), logins.write("\n")
+                logins.close()
 
                 username = username.getText().lower()
 
@@ -537,10 +569,9 @@ if Tela_Treino_no_cadastro:
     treino.draw(janela)
 
 
-
 while Tela_Treino_no_cadastro:
 
-    Nome_do_Treino = Text(Point(640,101), f"Treino de {username}")
+    Nome_do_Treino = Text(Point(640,101), f"Treino de {username.capitalize()}")
     Nome_do_Treino.setSize(15), Nome_do_Treino.setTextColor(color_rgb(166,166,166)), Nome_do_Treino.setStyle("bold")
     Nome_do_Treino.draw(janela)
     mostra_treino = []
