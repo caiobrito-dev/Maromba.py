@@ -160,6 +160,7 @@ def Mostra_Treino(arq, nome):
 
     return coluna1, coluna2
 
+
 def Altera_exercicio(arq, nome, exercicio_escolhido, alteracao):
     arq = open(arq, "r") #Abrindo arquivos com treinos
     treino = arq.read()
@@ -185,19 +186,47 @@ def Altera_exercicio(arq, nome, exercicio_escolhido, alteracao):
     #lista para realizar o replace
     novo_treino = []
 
+    #splitando entradas
+    exercicio_escolhido = exercicio_escolhido.split("-")
+    alteracao = alteracao.split("-")
+    print(exercicio_escolhido)
+    print(alteracao)
+    print(treino_esolhido)
+
     #procurando o exercicio para fazer a alteração
 
     for dia in treino_esolhido:
-        if exercicio_escolhido in dia:
 
-            novo_dia = dia.replace(exercicio_escolhido, alteracao)
-            novo_treino.append(novo_dia)
+        #Vendo se o exercicio está naquele dia de treino
+        if exercicio_escolhido[0] in dia:
+            novo_dia = ""
+            dia = dia.split(";")
+            novo_dia += dia[0] + ";" #colocando a parte inicial do treino (dia tal treino tal)
+
+            #Procurando o exercicio a partir disso
+            for exercicio in dia[1:]:
+
+                exercicio_splitado = exercicio.split(":") #Splito nos ':' para procurar pelo exercicio e se achar mudar tbm a serie
+
+                if exercicio_splitado[0] == exercicio_escolhido[0]: #Exercicio encontrado
+                    novo_dia += alteracao[0] + ":" + " "
+                    novo_dia += alteracao[1] + ";"
+                else:
+                    if len(exercicio_splitado) > 1: #Colocando os outros exercicio na string
+                        novo_dia += exercicio_splitado[0] + ":"
+                        novo_dia += exercicio_splitado[1] + ";"
+                    if exercicio == dia[-1]:
+                        novo_dia += exercicio_splitado[0]
+
+            novo_treino.append(novo_dia) #colocando na lista principal apos a alteração
+
         else:
             novo_treino.append(dia)
-
-
+    print(novo_treino)
+    print("------------------------")
     todos_os_treino[posicao_aluno] = novo_treino
-    print(todos_os_treino[posicao_aluno])
+    #print(todos_os_treino[posicao_aluno])
+    #print(todos_os_treino)
 
     treino_pro_arquivo = ""
 
@@ -212,7 +241,7 @@ def Altera_exercicio(arq, nome, exercicio_escolhido, alteracao):
     arq.write(treino_pro_arquivo)
     arq.close()
 
-#Altera_exercicio("treinos_teste.csv", "gb", "supino reto", "funciona pfvr")
+
 
 if Tela_Treinador_1:
     tela_treinador = Image(centro, "TELA_TREINADOR_1.png")
@@ -277,9 +306,11 @@ if Tela_Treinador_2:
     #inputs de exercicios
     exercicio_escolhido = cria_input(535,590, 20,13)
     alteracao_do_exercicio = cria_input(900,590, 20,13)
+
+
     #Mostrando treino do aluno desejado
     textos = Mostra_Treino("treinos.csv", aluno)
-    print(textos)
+
     if len(textos) == 2:
         coluna1 = Text(Point(426, 360), textos[0].title())
         coluna2 = Text(Point(853, 360), textos[1].title())
@@ -594,6 +625,8 @@ while Tela_Treino_no_cadastro:
 
     coluna1 = Text(Point(426,375), coluna1_txt.title())
     coluna2 = Text(Point(853,375), coluna2_txt.title())
+    coluna1.setSize(11)
+    coluna2.setSize(11)
     coluna1.draw(janela)
     coluna2.draw(janela)
     tecla = janela.getKey()
