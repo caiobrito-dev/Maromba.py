@@ -160,8 +160,46 @@ def Mostra_Treino(arq, nome):
 
     return coluna1, coluna2
 
-def Apaga_exercicio(arq, nome, exercicio):
-    print("trabalhando nisso")
+def Apaga_exercicio(arq, nome, exercicio_escolhido, alteracao):
+    arq = open(arq, "r") #Abrindo arquivos com treinos
+    treino = arq.read()
+    arq.close()
+    treino = treino.split("$") #Separando os treinos de cada pessoa
+    todos_os_treino = []
+
+    #colocando todos os treinos splitados em uma so lista
+    for pessoa in treino:
+        pessoa = pessoa.split("\n")
+        #retirando elementos vazios
+        for exercicio in pessoa:
+            if exercicio == "":
+                pessoa.remove(exercicio)
+        todos_os_treino.append(pessoa)
+
+    #procurando a pessoa
+    for pessoa in todos_os_treino:
+        if pessoa[0] == nome:
+            treino_esolhido = pessoa
+
+    #lista para realizar o replace
+    novo_treino = []
+
+    #procurando o exercicio para fazer a alteração
+    for dia in treino_esolhido:
+        if exercicio_escolhido in dia:
+
+            novo_dia = dia.replace(exercicio_escolhido, alteracao)
+            novo_treino.append(novo_dia)
+        else:
+            novo_treino.append(dia)
+
+    #Novo_treino é a lista do treino com a alteração agr é so escrever no arquivo
+
+
+
+
+#Teste da função
+#Apaga_exercicio("treinos.csv","gb", "supino reto", "agachamento")
 
 
 if Tela_Treinador_1:
@@ -224,13 +262,17 @@ if Tela_Treinador_2:
 
     tela_treinador = Image(centro, "TELA_TREINADOR_2.png")
     tela_treinador.draw(janela)
-    exercicio_escolhido = cria_input(680,590, 20,13)
+    #inputs de exercicios
+    exercicio_escolhido = cria_input(535,590, 20,13)
+    alteracao_do_exercicio = cria_input(900,590, 20,13)
     #Mostrando treino do aluno desejado
     textos = Mostra_Treino("treinos.csv", aluno)
     print(textos)
     if len(textos) == 2:
-        coluna1 = Text(Point(426, 375), textos[0].title())
-        coluna2 = Text(Point(853, 375), textos[1].title())
+        coluna1 = Text(Point(426, 360), textos[0].title())
+        coluna2 = Text(Point(853, 360), textos[1].title())
+        coluna1.setSize(10)
+        coluna2.setSize(10)
         coluna1.draw(janela)
         coluna2.draw(janela)
     else:
@@ -247,8 +289,9 @@ while Tela_Treinador_2:
 
         if 560 <= pos_mouseX <= 759 and 605 <= pos_mouseY <= 647:
             # Verificando texto
-            if exercicio_escolhido.getText() != "":
+            if exercicio_escolhido.getText() != "" and alteracao_do_exercicio.getText() != "":
                 exercicio = exercicio_escolhido.getText().strip().lower()
+                alteracao = alteracao_do_exercicio.getText().strip().lower()
 
                 exercicio_escolhido.undraw()
                 tela_treinador.undraw()
@@ -277,7 +320,9 @@ while Tela_Treino_Login:
 
     texto = Mostra_Treino("treinos.csv", dados['Username'])
     coluna1 = Text(Point(426,375), texto[0].title())
+    coluna1.setSize(11)
     coluna2 = Text(Point(853,375), texto[1].title())
+    coluna2.setSize(11)
     coluna1.draw(janela)
     coluna2.draw(janela)
     tecla = janela.getKey()
@@ -496,7 +541,7 @@ if Tela_Treino_no_cadastro:
 while Tela_Treino_no_cadastro:
 
     Nome_do_Treino = Text(Point(640,101), f"Treino de {username}")
-    Nome_do_Treino.setSize(17), Nome_do_Treino.setTextColor(color_rgb(166,166,166)), Nome_do_Treino.setStyle("bold")
+    Nome_do_Treino.setSize(15), Nome_do_Treino.setTextColor(color_rgb(166,166,166)), Nome_do_Treino.setStyle("bold")
     Nome_do_Treino.draw(janela)
     mostra_treino = []
 
