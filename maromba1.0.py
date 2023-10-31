@@ -23,6 +23,7 @@ peso_flag = False
 altura_flag = False
 disponibilidade_flag = False
 objetivo_flag = False
+contlog = 0
 
 dados = dict(Username="", Senha="")
 
@@ -46,6 +47,7 @@ Tela_Treino_Login = False
 Tela_Treinador_1 = False
 Tela_Treinador_2 = False
 Tela_Treinador_3 = False
+Tela_Gerar_Novo_Treino = False
 Tela_Loading = False
 Tela_Treino_no_cadastro = False
 
@@ -241,6 +243,53 @@ def Altera_exercicio(arq, nome, exercicio_escolhido, alteracao):
     arq.write(treino_pro_arquivo)
     arq.close()
 
+api_key = "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"
+
+def requi(idade, genero, peso, altura, disponibilidade):
+        link = "https://api.openai.com/v1/chat/completions"
+        idgpt = "gpt-3.5-turbo"
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+
+        mensagem = {
+            "model": idgpt,
+            "messages": [{"role": "user", "content": f"""monte um treino, apenas com agrupamento do dia, exercícios com suas series e repetições.
+Ao trocar de dia (treino), crie a próxima linha com apenas o caractere ' ; '
+Sem textos supérfluos 
+idade:{idade}
+sexo: {genero}
+peso: {peso}
+altura: {altura}
+dias da semana disponíveis para treino: {disponibilidade}
+
+-> Por exemplo:
+Dia 1 (Segunda-feira) - Treino de Peito e Tríceps:
+Supino Reto: 4x10
+Supino Inclinado com Halteres: 3x12
+Crucifixo na Máquina: 3x12
+Tríceps Testa: 4x10
+Tríceps Corda no Pulley: 3x12
+;
+Dia 2 (Terça-feira) - Treino de Pernas:
+Agachamento Livre: 4x10
+Leg Press: 3x12
+Cadeira Extensora: 3x12
+Flexora deitado: 4x10
+Panturrilha no Leg Press: 4x15
+;
+..."""}]
+        }
+
+        mensagem = json.dumps(mensagem)
+        requisicao = requests.post(link, headers=headers, data=mensagem)
+
+        output = requisicao.json()
+        output = output["choices"][0]["message"]["content"]
+        if output is not None or output != "":
+            print(output)
+            return output.lower()
+        else:
+            requi(idade, genero, peso, altura, disponibilidade)
+
 
 if Tela_Treinador_1:
     tela_treinador = Image(centro, "TELA_TREINADOR_1.png")
@@ -369,10 +418,10 @@ while Tela_Treinador_3:
         break
 
 if Tela_Treino_Login:
-    tela_treino = Image(centro, "TREINO.png")
+    tela_treino = Image(centro, "TELA_TREINO_NO_LOGIN.png")
     tela_treino.draw(janela)
 
-while Tela_Treino_Login:
+    #Printando treino
     Nome_do_Treino = Text(Point(640, 101), f"Treino de {dados['Username'].capitalize()}")
     Nome_do_Treino.setSize(17), Nome_do_Treino.setTextColor(color_rgb(166, 166, 166)), Nome_do_Treino.setStyle("bold")
     Nome_do_Treino.draw(janela)
@@ -383,10 +432,23 @@ while Tela_Treino_Login:
     coluna1.setSize(11), coluna1.setTextColor(color_rgb(166, 166, 166)), coluna1.setStyle('bold')
     coluna2.setSize(11), coluna2.setTextColor(color_rgb(166, 166, 166)), coluna2.setStyle('bold')
     coluna1.draw(janela), coluna2.draw(janela)
-    tecla = janela.getKey()
-    if tecla == "a":
-        janela.close()
-        break
+
+while Tela_Treino_Login:
+
+    #Checando mouse
+    pos_mouse = janela.checkMouse()
+    if pos_mouse is not None:
+        pos_mouseX = pos_mouse.getX()
+        pos_mouseY = pos_mouse.getY()
+
+        if 525 <= pos_mouseX <= 655 and 606 <= pos_mouseY <= 648:
+            coluna1.undraw()
+            coluna2.undraw()
+            Nome_do_Treino.undraw()
+            tela_treino.undraw()
+            Tela_Treino_Login = False
+            Tela_Gerar_Novo_Treino = True
+
 
 if Tela_Cadastro:
     # tela de cadastro
@@ -453,11 +515,11 @@ while Tela_Cadastro:
 
             if username_flag and username.getText() != "" and senha_flag and senha.getText() != "" and email_flag and email.getText() != "" and genero_flag and genero.getText() != "" and idade_flag and idade.getText() != "" and peso_flag and peso.getText() != "" and altura_flag and altura.getText() != "" and disponibilidade_flag and disponibilidade.getText() != "" and objetivo_flag and objetivo.getText() != "":
                 username.undraw(), senha.undraw(), email.undraw(), genero.undraw(), idade.undraw(), peso.undraw(), altura.undraw(), disponibilidade.undraw(), objetivo.undraw()
-                logins.write(username.getText().lower()), logins.write(";")
-                logins.write(senha.getText().lower()), logins.write(";"), logins.write("\n")
+                logins.write(username.getText().strip().lower()), logins.write(";")
+                logins.write(senha.getText().strip().lower()), logins.write(";"), logins.write("\n")
                 logins.close()
 
-                username = username.getText().lower()
+                username = username.getText().strip().lower()
 
                 idade = idade.getText()
                 print(idade)
@@ -478,63 +540,69 @@ while Tela_Cadastro:
                 erro_cadastro.draw(janela)
                 print("nao digitou")
 
-# While Tela_Cadastro_Novo_Treino:
+if Tela_Gerar_Novo_Treino:
+    tela_gerar = Image(centro, "TELA_GERAR_NOVO_TREINO.png")
+    tela_gerar.draw(janela)
+
+while Tela_Gerar_Novo_Treino:
+
+    pos_mouse = janela.checkMouse()
+    if pos_mouse is not None:
+        pos_mouseX = pos_mouse.getX()
+        pos_mouseY = pos_mouse.getY()
+
+        # clicando na caixa de gênero
+        if 347 <= pos_mouseX <= 507 and 287 <= pos_mouseY <= 319:
+            genero = cria_input(427, 303, 15, 12)
+            genero_flag = True
+
+        # clicando na caixa de idade
+        if 539 <= pos_mouseX <= 639 and 287 <= pos_mouseY <= 319:
+            idade = cria_input(589, 303, 8, 12)
+            idade_flag = True
+
+        # clicando na caixa de peso
+        if 671 <= pos_mouseX <= 771  and 287 <= pos_mouseY <= 319:
+            peso = cria_input(721, 303, 8, 12)
+            peso_flag = True
+
+        # clicando na caixa de altura
+        if 803 <= pos_mouseX <= 903 and 287 <= pos_mouseY <= 319:
+            altura = cria_input(853, 303, 8, 12)
+            altura_flag = True
+
+        # clicando na caixa de disponibilidade
+        if 347 <= pos_mouseX <= 903 and 360 <= pos_mouseY <= 392:
+            disponibilidade = cria_input(625, 376, 59, 12)
+            disponibilidade_flag = True
+
+        # clicando na caixa de objetivo
+        if 347 <= pos_mouseX <= 903 and 432 <= pos_mouseY <= 464:
+            objetivo = cria_input(625, 448, 59, 12)
+            objetivo_flag = True
+
+        if 563 <= pos_mouseX <= 723 and 480 <= pos_mouseY <= 528:
+            if genero_flag and genero.getText() != "" and idade_flag and idade.getText() != "" and peso_flag and peso.getText() != "" and altura_flag and altura.getText() != "" and disponibilidade_flag and disponibilidade.getText() != "" and objetivo_flag and objetivo.getText() != "":
+                genero.undraw(), idade.undraw(), peso.undraw(), altura.undraw(), disponibilidade.undraw(), objetivo.undraw()
+
+                idade = idade.getText().strip()
+                genero = genero.getText().strip()
+                peso = peso.getText().strip()
+                altura = altura.getText().strip()
+                disponibilidade = disponibilidade.getText().strip()
+                Tela_Gerar_Novo_Treino = False
+                tela_gerar.undraw()
+                Tela_Loading = True
+
 
 # tela de loading
 if Tela_Loading:
     loading = Image(centro, 'LOADING.png')
     loading.draw(janela)
 
-api_key = "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"
-
 while Tela_Loading:
-    def requi():
-        link = "https://api.openai.com/v1/chat/completions"
-        idgpt = "gpt-3.5-turbo"
-        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
-        mensagem = {
-            "model": idgpt,
-            "messages": [{"role": "user", "content": f"""monte um treino, apenas com agrupamento do dia, exercícios com suas series e repetições.
-Ao trocar de dia (treino), crie a próxima linha com apenas o caractere ' ; '
-Sem textos supérfluos 
-idade:{idade}
-sexo: {genero}
-peso: {peso}
-altura: {altura}
-dias da semana disponíveis para treino: {disponibilidade}
-
--> Por exemplo:
-Dia 1 (Segunda-feira) - Treino de Peito e Tríceps:
-Supino Reto: 4x10
-Supino Inclinado com Halteres: 3x12
-Crucifixo na Máquina: 3x12
-Tríceps Testa: 4x10
-Tríceps Corda no Pulley: 3x12
-;
-Dia 2 (Terça-feira) - Treino de Pernas:
-Agachamento Livre: 4x10
-Leg Press: 3x12
-Cadeira Extensora: 3x12
-Flexora deitado: 4x10
-Panturrilha no Leg Press: 4x15
-;
-..."""}]
-        }
-
-        mensagem = json.dumps(mensagem)
-        requisicao = requests.post(link, headers=headers, data=mensagem)
-
-        output = requisicao.json()
-        output = output["choices"][0]["message"]["content"]
-        if output is not None or output != "":
-            print(output)
-            return output.lower()
-        else:
-            requi()
-
-
-    output = requi()
+    output = requi(idade, genero, peso, altura, disponibilidade)
 
     # Recebendo output do gpt
     if output != "":
@@ -543,7 +611,7 @@ Panturrilha no Leg Press: 4x15
         todos_os_treino = []  # Lista com todos os dias de treino
 
         output_sem_carac_proibidos = (output.replace("ç", "c").replace("í", "i").replace("ô", "o").replace("ã", "a")
-                                      .replace("á", "a").replace("õ", "o"))
+                                      .replace("á", "a").replace("õ", "o").replace("ú", "u"))
         output = output_sem_carac_proibidos.split(";")
 
         for dia in output:
@@ -586,7 +654,7 @@ Panturrilha no Leg Press: 4x15
         break
 
 if Tela_Treino_no_cadastro:
-    treino = Image(centro, "TREINO.png")
+    treino = Image(centro, "TELA_TREINO_NO_CADASTRO.png")
     Tela_Loading = False
     Tela_Cadastro = False
     Tela_Login = False
@@ -594,9 +662,14 @@ if Tela_Treino_no_cadastro:
 
 while Tela_Treino_no_cadastro:
 
-    Nome_do_Treino = Text(Point(640, 101), f"Treino de {username.capitalize()}")
-    Nome_do_Treino.setSize(15), Nome_do_Treino.setTextColor(color_rgb(166, 166, 166)), Nome_do_Treino.setStyle("bold")
-    Nome_do_Treino.draw(janela)
+    if contlog == 1:
+        Nome_do_Treino = Text(Point(640, 101), f"Treino de {dados['Username'].capitalize()}")
+        Nome_do_Treino.setSize(15), Nome_do_Treino.setTextColor(color_rgb(166, 166, 166)), Nome_do_Treino.setStyle("bold")
+        Nome_do_Treino.draw(janela)
+    else:
+        Nome_do_Treino = Text(Point(640, 101), f"Treino de {username.capitalize()}")
+        Nome_do_Treino.setSize(15), Nome_do_Treino.setTextColor(color_rgb(166, 166, 166)), Nome_do_Treino.setStyle("bold")
+        Nome_do_Treino.draw(janela)
     mostra_treino = []
 
     for exercicio in treino_com_quebralinha:
